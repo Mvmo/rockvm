@@ -1,1 +1,3 @@
 jmp 121 1212
+pushi 1000
+pushs "Hello, World"
