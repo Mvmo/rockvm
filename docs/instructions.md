@@ -19,4 +19,12 @@ Push boolean on top of stack
 Push string on top of stack
 > pushs \<str>
 
-## jmp
+## JMP
+Jump to specific instruction
+> jmp \<int>
+
+## CJMP
+> Stack Requirement: \<bool>
+
+Jumps to specific instruction if \<bool> on stack is true else it jumps to another specified instruction
+> cjmp \<int> \<int>
