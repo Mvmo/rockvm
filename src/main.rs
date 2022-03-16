@@ -1,5 +1,7 @@
 use std::fs;
 use std::fmt;
+use std::collections::{VecDeque};
+use std::any::{Any};
 
 #[derive(Debug)]
 enum Instruction {
@@ -86,6 +88,84 @@ fn parse_lines(lines: &Vec<&str>) -> Vec<Instruction> {
 fn print_instructions(instructions: &Vec<Instruction>) {
     instructions.iter()
         .for_each(|instruction| println!("{}", instruction.to_string()))
+}
+
+type TypeName = &'static str;
+
+trait RockType {
+    fn new(name: String) -> Self;
+    fn name(&self) -> &str;
+}
+
+struct PrimitiveType {
+    name: String
+}
+
+impl RockType for PrimitiveType {
+    fn new(name: String) -> Self {
+        PrimitiveType { name }
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+}
+
+struct ComplexType {
+    name: String,
+    fields: Vec<Field>
+}
+
+impl RockType for ComplexType {
+    fn new(name: String) -> Self {
+        ComplexType { name: name, fields: Vec::new() }
+    }
+
+    fn name(&self) -> &str {
+        &self.name
+    }
+}
+
+struct Field {
+    name: String,
+    type_name: TypeName
+}
+
+impl Field {
+    fn new(name: String, type_name: TypeName) -> Self {
+        Field { name, type_name }
+    }
+}
+
+trait RockInstance<T: RockType> {
+    fn _type(&self) -> &T;
+}
+
+struct PrimitiveInstance {
+    _type: &'static PrimitiveType,
+    value: dyn Any
+}
+
+/*const INT_PRIMITIVE: PrimitiveType = PrimitiveType::new("int".to_string());
+const BOOL_PRIMITIVE: PrimitiveType = PrimitiveType::new("bool".to_string());
+const STRING_PRIMITIVE: PrimitiveType = PrimitiveType::new("string".to_string());
+*/
+
+impl RockInstance<PrimitiveType> for PrimitiveInstance {
+    fn _type(&self) -> &PrimitiveType {
+        self._type 
+    }
+}
+
+struct ComplexInstance {
+    _type: &'static ComplexType,
+    values: Vec<&'static dyn RockInstance<dyn Any>>
+}
+
+impl RockInstance<ComplexType> for ComplexInstance {
+    fn _type(&self) -> &ComplexType {
+        self._type
+    }
 }
 
 fn main() {
