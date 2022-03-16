@@ -1,6 +1,8 @@
+#![allow(unused_imports)]
+#![allow(dead_code)]
+
 use std::fs;
 use std::fmt;
-use std::collections::{VecDeque};
 use std::any::{Any};
 
 #[derive(Debug)]
@@ -8,7 +10,8 @@ enum Instruction {
     PushInt(i32),
     PushBool(bool),
     PushString(String),
-    Jump(u64, u64),
+    Jump(u64),
+    ConditionalJump(u64, u64),
     Add,
     Subtract,
     Multiply,
@@ -57,6 +60,14 @@ fn parse_line(line: &str) -> Instruction {
             )
         },
         "jmp" => {
+            Instruction::Jump(
+                splitted.next()
+                    .map(|where_to_jump| where_to_jump.parse::<u64>())
+                    .expect("Require where_to_jump param")
+                    .unwrap()
+            )
+        },
+        "cjmp" => {
             let if_true = splitted.next()
                 .map(|if_true| if_true.parse::<u64>())
                 .expect("Require if_true param")
@@ -65,9 +76,9 @@ fn parse_line(line: &str) -> Instruction {
                 .map(|if_false| if_false.parse::<u64>())
                 .expect("Require if_false param")
                 .unwrap();
-            
-            Instruction::Jump(if_true, if_false)
-        },
+        
+            Instruction::ConditionalJump(if_true, if_false)
+        }
         "add" => Instruction::Add,
         "sub" => Instruction::Subtract,
         "mul" => Instruction::Multiply,
@@ -168,6 +179,33 @@ impl RockInstance<ComplexType> for ComplexInstance {
     }
 }
 
+fn evaluate_instructions(instructions: &Vec<Instruction>) {
+    let mut index = 0;
+    loop {
+        if index >= instructions.len() {
+            break
+        }
+
+        let instruction = instructions.get(index)
+            .expect("Error while trying to access instruction");
+
+        match &*instruction {
+            Instruction::PushInt(i) => println!("push {}", i),
+            Instruction::PushBool(b) => println!("push {}", b),
+            Instruction::PushString(s) => println!("push {}", s),
+            Instruction::Jump(where_to_jump) => {
+                println!("jump {}", where_to_jump);
+                index = *where_to_jump as usize
+            }
+            _ => {
+                println!("none")
+            }
+        }
+
+        index += 1
+    }
+}
+
 fn main() {
     let file_name = String::from("examples/example.rock");
     let file_content = fs::read_to_string(file_name)
@@ -178,5 +216,5 @@ fn main() {
         .collect();
 
     let instructions = parse_lines(&lines);
-    print_instructions(&instructions)
+    evaluate_instructions(&instructions);
 }
