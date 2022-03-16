@@ -29,12 +29,20 @@ fn parse_line(line: &str) -> Instruction {
 
     return match instruction_name.as_str() {
         "pushi" => {
-            let value = splitted.next().map(|value| value.parse::<i32>()).expect("require value param in pushi instruction").unwrap();
-            Instruction::PushInt(value)
+            Instruction::PushInt(
+                splitted.next()
+                    .map(|value| value.parse::<i32>())
+                    .expect("require value param in pushi instruction")
+                    .unwrap()
+            )
         },
         "pushb" => {
-            let value = splitted.next().map(|value| value.parse::<bool>()).expect("require bool param in pushb instruction").unwrap();
-            Instruction::PushBool(value)
+            Instruction::PushBool(
+                splitted.next()
+                    .map(|value| value.parse::<bool>())
+                    .expect("require bool param in pushb instruction")
+                    .unwrap()
+            )
         },
         "pushs" => {
             Instruction::PushString(
@@ -47,8 +55,14 @@ fn parse_line(line: &str) -> Instruction {
             )
         },
         "jmp" => {
-            let if_true = splitted.next().map(|if_true| if_true.parse::<u64>()).expect("Require if_true param").unwrap();
-            let if_false = splitted.next().map(|if_false| if_false.parse::<u64>()).expect("Require if_false param").unwrap();
+            let if_true = splitted.next()
+                .map(|if_true| if_true.parse::<u64>())
+                .expect("Require if_true param")
+                .unwrap();
+            let if_false = splitted.next()
+                .map(|if_false| if_false.parse::<u64>())
+                .expect("Require if_false param")
+                .unwrap();
             
             Instruction::Jump(if_true, if_false)
         },
@@ -63,16 +77,26 @@ fn parse_line(line: &str) -> Instruction {
     }
 }
 
+fn parse_lines(lines: &Vec<&str>) -> Vec<Instruction> {
+    lines.iter()
+        .map(|line| parse_line(line))
+        .collect()
+}
+
+fn print_instructions(instructions: &Vec<Instruction>) {
+    instructions.iter()
+        .for_each(|instruction| println!("{}", instruction.to_string()))
+}
+
 fn main() {
     let file_name = String::from("examples/example.rock");
     let file_content = fs::read_to_string(file_name)
         .expect("Something went wrong reading the file");
 
     let lines = file_content.lines()
-        .filter(|line| !line.is_empty());
+        .filter(|line| !line.is_empty())
+        .collect();
 
-    for line in lines {
-        let instruction = parse_line(line);
-        println!("{}", instruction.to_string())
-    }
+    let instructions = parse_lines(&lines);
+    print_instructions(&instructions)
 }
